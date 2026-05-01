@@ -1,132 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Windows XP Ultimate Gaming Edition</title>
-    <style>
-        :root { --xp-blue: #245edb; --xp-taskbar: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #333 100%); }
-        body { 
-            margin: 0; padding: 0; font-family: "Tahoma", sans-serif; 
-            background: #3a6ea5 url('http://googleusercontent.com/image_collection/image_retrieval/3421627798600401346_0') no-repeat center center fixed; 
-            background-size: cover; overflow: hidden; height: 100vh; 
-        }
-        
-        #taskbar { position: absolute; bottom: 0; width: 100%; height: 30px; background: var(--xp-taskbar); display: flex; align-items: center; z-index: 1000; }
-        #start-btn { height: 100%; padding: 0 15px; background: linear-gradient(to bottom, #388e3c 0%, #4caf50 100%); border: none; border-top-right-radius: 10px; border-bottom-right-radius: 10px; color: white; font-weight: bold; font-style: italic; cursor: pointer; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
-        
-        .desktop-icons { display: grid; grid-template-columns: repeat(1, 100px); gap: 15px; padding: 20px; }
-        .icon { width: 90px; text-align: center; color: white; text-shadow: 2px 2px 3px black; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .icon img { width: 50px; height: 50px; display: block; margin: 0 auto 5px; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5)); }
-
-        .window { position: absolute; background: #ece9d8; border: 3px solid var(--xp-blue); border-radius: 8px 8px 0 0; display: none; flex-direction: column; box-shadow: 10px 10px 25px rgba(0,0,0,0.5); min-width: 320px; z-index: 10; }
-        .title-bar { background: linear-gradient(to right, #245edb, #3f8cf3); color: white; padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; cursor: move; font-weight: bold; }
-        .close-btn { background: #e04343; color: white; border: 1px solid white; width: 18px; height: 18px; text-align: center; line-height: 14px; cursor: pointer; border-radius: 2px; }
-        .window-content { padding: 10px; background: #fff; }
-        
-        canvas { display: block; margin: 0 auto; background: #87CEEB; border: 2px solid #245edb; image-rendering: pixelated; }
-        .pkmn-screen { background: #f0f0f0; border: 4px double #333; height: 200px; position: relative; overflow: hidden; }
-        .pkmn-sprite { width: 80px; position: absolute; bottom: 20px; left: 20px; }
-        .enemy-sprite { width: 80px; position: absolute; top: 20px; right: 20px; transform: scaleX(-1); }
-    </style>
+<meta charset="UTF-8">
+<title>XP GAME OS - FULL EDITION</title>
+<style>
+body{margin:0;background:#0a0a0a;color:white;font-family:Tahoma;overflow:hidden}
+.desktop{display:grid;grid-template-columns:repeat(6,80px);gap:10px;padding:20px}
+.icon{cursor:pointer;text-align:center;font-size:11px}
+.window{position:absolute;background:#111;border:2px solid #0f0;display:none}
+.title{background:#0f0;color:black;padding:3px;cursor:move}
+canvas{background:black}
+#jumpscare{position:fixed;top:0;left:0;width:100%;height:100%;display:none;background-size:cover;z-index:999}
+</style>
 </head>
 <body>
 
-<div class="desktop-icons">
-    <div class="icon" onclick="openWindow('mario')"><img src="http://googleusercontent.com/image_collection/image_retrieval/16146307542113184986_0">Super Plumber</div>
-    <div class="icon" onclick="openWindow('sonic')"><img src="http://googleusercontent.com/image_collection/image_retrieval/17561636808278719477_0">Blue Blur</div>
-    <div class="icon" onclick="openWindow('zelda')"><img src="http://googleusercontent.com/image_collection/image_retrieval/14909276734744463661_0">Triangle Hero</div>
-    <div class="icon" onclick="openWindow('pokemon')"><img src="http://googleusercontent.com/image_collection/image_retrieval/1531092986992929614_0">Monsters</div>
+<div class="desktop">
+  <div class="icon" onclick="openGame('mario')">Mario</div>
+  <div class="icon" onclick="openGame('sonic')">Sonic</div>
+  <div class="icon" onclick="openGame('pacman')">Pacman</div>
+  <div class="icon" onclick="openGame('pokemon')">Pokemon</div>
+  <div class="icon" onclick="openGame('megaman')">Megaman</div>
+  <div class="icon" onclick="openGame('tetris')">Tetris</div>
+  <div class="icon" onclick="openGame('snake')">Snake</div>
+  <div class="icon" onclick="openGame('pong')">Pong</div>
+  <div class="icon" onclick="openGame('dodge')">Dodge</div>
+  <div class="icon" onclick="openGame('shooter')">Shooter</div>
+  <div class="icon" onclick="openGame('maze')">Maze</div>
+  <div class="icon" onclick="openGame('clicker')">Clicker</div>
+  <div class="icon" onclick="openGame('runner')">Runner</div>
+  <div class="icon" onclick="openGame('breaker')">Breaker</div>
+  <div class="icon" onclick="openGame('memory')">Memory</div>
+  <div class="icon" onclick="openGame('chaos')">Chaos</div>
+  <div class="icon" onclick="openGame('ghost')">Ghost</div>
+  <div class="icon" onclick="openGame('fire')">Fire</div>
+  <div class="icon" onclick="openGame('ice')">Ice</div>
+  <div class="icon" onclick="openGame('glitch')">Glitch</div>
+  <div class="icon" onclick="openGame('ai')">AI</div>
+  <div class="icon" onclick="openGame('survival')">Survival</div>
+  <div class="icon" onclick="openGame('escape')">Escape</div>
+  <div class="icon" onclick="openGame('???')">???</div>
 </div>
 
-<!-- Mario Window -->
-<div id="mario" class="window" style="top:50px; left:200px;"><div class="title-bar" onmousedown="drag(this.parentElement)"><span>Super Plumber World</span><div class="close-btn" onclick="closeWindow('mario')">X</div></div><div class="window-content"><canvas id="cMario" width="300" height="200"></canvas><p>Space to Jump!</p></div></div>
-
-<!-- Sonic Window -->
-<div id="sonic" class="window" style="top:80px; left:250px;"><div class="title-bar" onmousedown="drag(this.parentElement)"><span>Sonic Rush XP</span><div class="close-btn" onclick="closeWindow('sonic')">X</div></div><div class="window-content"><canvas id="cSonic" width="300" height="200"></canvas><p>Hold Right Arrow!</p></div></div>
-
-<!-- Zelda Window -->
-<div id="zelda" class="window" style="top:110px; left:300px;"><div class="title-bar" onmousedown="drag(this.parentElement)"><span>Legend of Triangle</span><div class="close-btn" onclick="closeWindow('zelda')">X</div></div><div class="window-content"><canvas id="cZelda" width="300" height="200"></canvas><p>WASD to explore!</p></div></div>
-
-<!-- Pokemon Window -->
-<div id="pokemon" class="window" style="top:140px; left:350px;"><div class="title-bar" onmousedown="drag(this.parentElement)"><span>Pocket Battle</span><div class="close-btn" onclick="closeWindow('pokemon')">X</div></div><div class="window-content">
-    <div class="pkmn-screen">
-        <img class="pkmn-sprite" src="http://googleusercontent.com/image_collection/image_retrieval/1531092986992929614_0">
-        <img class="enemy-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png">
-    </div>
-    <div id="pLog" style="height:60px; overflow-y:auto; border:1px solid #777; font-size:12px; margin:5px 0;">Wild Snorlax appeared!</div>
-    <button onclick="pkmnBattle()">Thunderbolt!</button>
-</div></div>
-
-<div id="taskbar"><button id="start-btn">start</button></div>
+<div id="jumpscare"></div>
+<audio id="s" src="https://www.myinstants.com/media/sounds/movie_1.mp3"></audio>
 
 <script>
-    const keys = {};
-    window.onkeydown = e => keys[e.code] = true;
-    window.onkeyup = e => keys[e.code] = false;
+function openGame(type){
+  const w=document.createElement('div');
+  w.className='window';
+  w.style.left=Math.random()*600+'px';
+  w.style.top=Math.random()*300+'px';
+  w.innerHTML=`<div class='title'>${type} <span onclick="this.parentElement.parentElement.remove()">X</span></div><canvas width=300 height=200></canvas>`;
+  document.body.appendChild(w);
+  w.style.display='block';
+  drag(w);
 
-    const imgM = new Image(); imgM.src = 'http://googleusercontent.com/image_collection/image_retrieval/16146307542113184986_0';
-    const imgS = new Image(); imgS.src = 'http://googleusercontent.com/image_collection/image_retrieval/17561636808278719477_0';
-    const imgL = new Image(); imgL.src = 'http://googleusercontent.com/image_collection/image_retrieval/14909276734744463661_0';
+  const ctx=w.querySelector('canvas').getContext('2d');
 
-    function openWindow(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
+  let x=150,y=100,vx=2,vy=2;
 
-    function drag(el) {
-        el.onmousedown = e => {
-            if(e.target.className === 'close-btn') return;
-            let px = e.clientX, py = e.clientY;
-            document.onmousemove = e => {
-                el.style.left = el.offsetLeft + (e.clientX - px) + "px";
-                el.style.top = el.offsetTop + (e.clientY - py) + "px";
-                px = e.clientX; py = e.clientY;
-            };
-            document.onmouseup = () => document.onmousemove = null;
-        };
-    }
+  function loop(){
+    ctx.fillStyle='black';ctx.fillRect(0,0,300,200);
 
-    const mCtx = document.getElementById('cMario').getContext('2d');
-    let mY = 140, mV = 0;
-    function loopMario() {
-        mCtx.fillStyle = '#5c94fc'; mCtx.fillRect(0,0,300,200);
-        mCtx.fillStyle = '#71c037'; mCtx.fillRect(0,170,300,30);
-        if(keys['Space'] && mY >= 140) mV = -10;
-        mY += mV; mV += 0.6;
-        if(mY > 140) { mY = 140; mV = 0; }
-        mCtx.drawImage(imgM, 50, mY, 30, 30);
-        requestAnimationFrame(loopMario);
-    }
+    switch(type){
+      case 'mario':
+        y+=vy;vy+=0.5;if(y>160){y=160;vy=0}
+        ctx.fillStyle='red';ctx.fillRect(50,y,20,20);
+        break;
 
-    const sCtx = document.getElementById('cSonic').getContext('2d');
-    let sX = 0;
-    function loopSonic() {
-        sCtx.fillStyle = '#004d00'; sCtx.fillRect(0,0,300,200);
-        if(keys['ArrowRight']) sX += 5;
-        for(let i=0; i<10; i++){
-            sCtx.strokeStyle = 'yellow'; sCtx.lineWidth = 3;
-            sCtx.strokeOval = sCtx.strokeRect(300-((sX+i*80)%400), 120, 15, 15);
+      case 'sonic':
+        x=(x+10)%300;
+        ctx.fillStyle='blue';ctx.fillRect(x,150,20,20);
+        break;
+
+      case 'pacman':
+        ctx.fillStyle='yellow';ctx.beginPath();ctx.arc(x,y,10,0,Math.PI*2);ctx.fill();
+        x+=vx;y+=vy;
+        break;
+
+      case 'pokemon':
+        ctx.fillStyle='white';ctx.fillText('Battle!',120,100);
+        break;
+
+      case 'megaman':
+        ctx.fillStyle='cyan';ctx.fillRect(x,y,20,20);
+        x+=vx;
+        break;
+
+      default:
+        for(let i=0;i<20;i++){
+          ctx.fillStyle=`rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`;
+          ctx.fillRect(Math.random()*300,Math.random()*200,5,5);
         }
-        sCtx.drawImage(imgS, 20, 130, 40, 40);
-        requestAnimationFrame(loopSonic);
     }
 
-    const zCtx = document.getElementById('cZelda').getContext('2d');
-    let zP = {x:140, y:90};
-    function loopZelda() {
-        zCtx.fillStyle = '#1e5d1e'; zCtx.fillRect(0,0,300,200);
-        if(keys['KeyW']) zP.y -= 3; if(keys['KeyS']) zP.y += 3;
-        if(keys['KeyA']) zP.x -= 3; if(keys['KeyD']) zP.x += 3;
-        zCtx.drawImage(imgL, zP.x, zP.y, 30, 30);
-        requestAnimationFrame(loopZelda);
-    }
+    if(Math.random()<0.002) jumpscare();
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
 
-    function pkmnBattle() {
-        const log = document.getElementById('pLog');
-        log.innerHTML += `<br>Pikachu used Thunderbolt!`;
-        log.innerHTML += `<br>Snorlax is sleeping...`;
-        log.scrollTop = log.scrollHeight;
-    }
+function drag(el){
+  el.onmousedown=e=>{
+    let x=e.clientX,y=e.clientY;
+    document.onmousemove=e=>{
+      el.style.left=el.offsetLeft+(e.clientX-x)+'px';
+      el.style.top=el.offsetTop+(e.clientY-y)+'px';
+      x=e.clientX;y=e.clientY;
+    };
+    document.onmouseup=()=>document.onmousemove=null;
+  }
+}
 
-    loopMario(); loopSonic(); loopZelda();
+function jumpscare(){
+  const j=document.getElementById('jumpscare');
+  const imgs=[
+    'https://i.imgur.com/8QZ7Z7R.jpg',
+    'https://i.imgur.com/Z6X8K0k.jpg',
+    'https://i.imgur.com/WP7dKXK.jpg'
+  ];
+  j.style.backgroundImage=`url(${imgs[Math.floor(Math.random()*imgs.length)]})`;
+  j.style.display='block';
+  document.getElementById('s').play().catch(()=>{});
+  setTimeout(()=>j.style.display='none',500);
+}
+
+setInterval(()=>{
+  if(Math.random()<0.3){
+    document.body.style.background=`rgb(${Math.random()*255},0,0)`;
+  }
+},2000);
+
+setInterval(()=>{
+  if(Math.random()<0.2) jumpscare();
+},6000);
 </script>
+
 </body>
 </html>
