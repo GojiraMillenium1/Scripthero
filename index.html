@@ -1,1 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Windows XP - Gamer Edition</title>
+    <style>
+        :root { --xp-blue: #245edb; --xp-taskbar: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #333 100%); }
+        body { margin: 0; padding: 0; font-family: "Tahoma", sans-serif; background: #3a6ea5 url('https://wallpaperaccess.com/full/1560934.jpg') no-repeat center center fixed; background-size: cover; overflow: hidden; height: 100vh; }
+        
+        #taskbar { position: absolute; bottom: 0; width: 100%; height: 30px; background: var(--xp-taskbar); display: flex; align-items: center; z-index: 1000; }
+        #start-btn { height: 100%; padding: 0 15px; background: linear-gradient(to bottom, #388e3c 0%, #4caf50 100%); border: none; border-top-right-radius: 10px; border-bottom-right-radius: 10px; color: white; font-weight: bold; font-style: italic; cursor: pointer; }
+        
+        .desktop-icons { display: grid; grid-template-columns: repeat(1, 80px); gap: 10px; padding: 20px; }
+        .icon { width: 80px; text-align: center; color: white; text-shadow: 1px 1px 2px black; cursor: pointer; font-size: 11px; }
+        .icon img { width: 40px; height: 40px; display: block; margin: 0 auto 5px; image-rendering: pixelated; }
 
+        .window { position: absolute; background: #ece9d8; border: 3px solid var(--xp-blue); border-radius: 8px 8px 0 0; display: none; flex-direction: column; box-shadow: 5px 5px 15px rgba(0,0,0,0.4); min-width: 320px; }
+        .title-bar { background: linear-gradient(to right, #245edb, #3f8cf3); color: white; padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; cursor: move; font-weight: bold; font-size: 13px; }
+        .close-btn { background: #e04343; color: white; border: 1px solid white; width: 18px; height: 18px; text-align: center; line-height: 14px; cursor: pointer; border-radius: 2px; }
+        .window-content { padding: 10px; text-align: center; }
+        
+        canvas { background: #000; display: block; margin: 0 auto; border: 1px solid #000; }
+        .game-info { font-size: 12px; margin-top: 5px; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="desktop-icons">
+    <div class="icon" onclick="openWindow('mario')"><img src="https://cdn-icons-png.flaticon.com/512/588/588832.png">Super Plumber</div>
+    <div class="icon" onclick="openWindow('sonic')"><img src="https://cdn-icons-png.flaticon.com/512/811/811370.png">Blue Blur</div>
+    <div class="icon" onclick="openWindow('zelda')"><img src="https://cdn-icons-png.flaticon.com/512/580/580005.png">Triangle Hero</div>
+    <div class="icon" onclick="openWindow('pokemon')"><img src="https://cdn-icons-png.flaticon.com/512/188/188987.png">Monsters</div>
+</div>
+
+<!-- Windows for Games -->
+<div id="mario" class="window" style="top:50px; left:200px;"><div class="title-bar" onmousedown="drag(this.parentElement)"><span>Super Plumber (Arrows to Jump)</span><div class="close-btn" onclick="closeWindow('mario')">X</div></div><div class="window-content"><canvas id="cMario" width="300" height="200"></canvas></div></div>
+<div id="sonic" class="window" style="top:80px; left:250px;"><div class="title-bar" onmousedown="drag(this.parentElement)"><span>Blue Blur (Hold Right)</span><div class="close-btn" onclick="closeWindow('sonic')">X</div></div><div class="window-content"><canvas id="cSonic" width="300" height="200"></canvas></div></div>
+<div id="zelda" class="window" style="top:110px; left:300px;"><div class="title-bar" onmousedown="drag(this.parentElement)"><span>Triangle Hero (WASD to Move)</span><div class="close-btn" onclick="closeWindow('zelda')">X</div></div><div class="window-content"><canvas id="cZelda" width="300" height="200"></canvas></div></div>
+<div id="pokemon" class="window" style="top:140px; left:350px;"><div class="title-bar" onmousedown="drag(this.parentElement)"><span>Pocket Monsters</span><div class="close-btn" onclick="closeWindow('pokemon')">X</div></div><div class="window-content"><div id="pLog" style="height:150px; overflow-y:auto; background:white; font-size:12px; text-align:left; padding:5px; border:1px inset #777;">A wild AI appears!</div><button onclick="pkmnBattle()">Attack!</button></div></div>
+
+<div id="taskbar"><button id="start-btn">start</button></div>
+
+<script>
+    const keys = {};
+    window.onkeydown = e => keys[e.code] = true;
+    window.onkeyup = e => keys[e.code] = false;
+
+    function openWindow(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
+
+    function drag(el) {
+        el.onmousedown = e => {
+            let px = e.clientX, py = e.clientY;
+            document.onmousemove = e => {
+                el.style.left = el.offsetLeft + (e.clientX - px) + "px";
+                el.style.top = el.offsetTop + (e.clientY - py) + "px";
+                px = e.clientX; py = e.clientY;
+            };
+            document.onmouseup = () => document.onmousemove = null;
+        };
+    }
+
+    // --- MARIO RIPOFF (Simple Jumper) ---
+    const mCtx = document.getElementById('cMario').getContext('2d');
+    let mY = 160, mV = 0, mG = 0.5;
+    function loopMario() {
+        mCtx.fillStyle = '#5c94fc'; mCtx.fillRect(0,0,300,200);
+        mCtx.fillStyle = '#8b4513'; mCtx.fillRect(0,180,300,20);
+        if(keys['ArrowUp'] && mY >= 160) mV = -8;
+        mY += mV; mV += mG;
+        if(mY > 160) { mY = 160; mV = 0; }
+        mCtx.fillStyle = 'red'; mCtx.fillRect(50, mY, 20, 20); // Plumber
+        requestAnimationFrame(loopMario);
+    }
+    loopMario();
+
+    // --- SONIC RIPOFF (Speed Scroller) ---
+    const sCtx = document.getElementById('cSonic').getContext('2d');
+    let sX = 0;
+    function loopSonic() {
+        sCtx.fillStyle = '#00008b'; sCtx.fillRect(0,0,300,200);
+        sX = (keys['ArrowRight']) ? (sX + 10) % 300 : sX;
+        sCtx.strokeStyle = 'yellow';
+        for(let i=0; i<5; i++) sCtx.strokeRect(300 - ((sX + i*60)%300), 100, 15, 15); // Rings
+        sCtx.fillStyle = 'blue'; sCtx.fillRect(30, 150, 25, 25); // Blur
+        requestAnimationFrame(loopSonic);
+    }
+    loopSonic();
+
+    // --- ZELDA RIPOFF (Top Down) ---
+    const zCtx = document.getElementById('cZelda').getContext('2d');
+    let zP = {x:140, y:90};
+    function loopZelda() {
+        zCtx.fillStyle = '#228b22'; zCtx.fillRect(0,0,300,200);
+        if(keys['KeyW']) zP.y -= 2; if(keys['KeyS']) zP.y += 2;
+        if(keys['KeyA']) zP.x -= 2; if(keys['KeyD']) zP.x += 2;
+        zCtx.fillStyle = '#00ff00'; zCtx.fillRect(zP.x, zP.y, 15, 20); // Hero
+        zCtx.fillStyle = '#ffd700'; zCtx.fillRect(250, 20, 20, 20); // Triforce
+        requestAnimationFrame(loopZelda);
+    }
+    loopZelda();
+
+    // --- POKEMON RIPOFF (Text Battle) ---
+    function pkmnBattle() {
+        const log = document.getElementById('pLog');
+        const moves = ["Slash", "Fire Breath", "Glitch", "Tail Whip"];
+        const move = moves[Math.floor(Math.random()*moves.length)];
+        log.innerHTML += `<br>> Plumber used ${move}! It's effective!`;
+        log.innerHTML += `<br>> Enemy AI used Debug! HP is falling!`;
+        log.scrollTop = log.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
