@@ -2,237 +2,240 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Windows XP - Pro Gamer Edition</title>
+    <title>The Legend of Script</title>
     <style>
-        :root { --xp-blue: #245edb; --xp-taskbar: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #333 100%); }
         body { 
-            margin: 0; padding: 0; font-family: "Tahoma", sans-serif; 
-            background: #3a6ea5 url('https://i.imgur.com/v6S4JST.jpeg') no-repeat center center fixed; 
-            background-size: cover; overflow: hidden; height: 100vh; user-select: none;
+            margin: 0; background: #111; color: white; 
+            font-family: 'Courier New', Courier, monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; overflow: hidden;
         }
-
-        /* Desktop Grid */
-        .desktop { 
-            display: grid; grid-template-columns: repeat(auto-fill, 90px); 
-            grid-template-rows: repeat(auto-fill, 100px);
-            gap: 15px; padding: 20px; height: calc(100vh - 40px); align-content: start;
+        #game-container { position: relative; border: 4px solid #555; box-shadow: 0 0 20px #000; }
+        canvas { background: #1e5d1e; display: block; image-rendering: pixelated; }
+        #ui { 
+            width: 600px; padding: 10px; display: flex; justify-content: space-between; 
+            background: #333; border: 4px solid #555; border-bottom: none;
         }
-        .icon { 
-            width: 80px; text-align: center; color: white; text-shadow: 2px 2px 3px black; 
-            cursor: pointer; font-size: 11px; font-weight: bold; padding: 5px; border-radius: 3px;
-        }
-        .icon:hover { background: rgba(255, 255, 255, 0.2); }
-        .icon span { font-size: 40px; display: block; margin-bottom: 5px; filter: drop-shadow(2px 2px 2px black); }
-
-        /* Window System */
-        .window { 
-            position: absolute; background: #ece9d8; border: 3px solid var(--xp-blue); 
-            border-radius: 8px 8px 0 0; display: flex; flex-direction: column; 
-            box-shadow: 10px 10px 30px rgba(0,0,0,0.5); z-index: 10; width: 450px;
-        }
-        .title-bar { 
-            background: linear-gradient(to right, #245edb, #3f8cf3); color: white; 
-            padding: 5px 10px; display: flex; justify-content: space-between; 
-            align-items: center; cursor: move; font-weight: bold; font-size: 13px;
-        }
-        .close-btn { 
-            background: #e04343; color: white; border: 1px solid white; 
-            width: 21px; height: 21px; text-align: center; line-height: 18px; 
-            cursor: pointer; border-radius: 3px; font-weight: bold;
-        }
-        .window-content { padding: 10px; background: #ece9d8; }
-        canvas { display: block; margin: 0 auto; border: 2px solid #333; background: #000; }
-
-        #taskbar { 
-            position: absolute; bottom: 0; width: 100%; height: 35px; 
-            background: var(--xp-taskbar); display: flex; align-items: center; z-index: 1000; 
-        }
-        .start-btn { 
-            height: 100%; padding: 0 15px; background: linear-gradient(to bottom, #388e3c 0%, #4caf50 100%); 
-            border: none; border-top-right-radius: 12px; border-bottom-right-radius: 12px; 
-            color: white; font-weight: bold; font-style: italic; font-size: 16px; cursor: pointer;
-            box-shadow: inset -2px 0 5px rgba(0,0,0,0.2);
-        }
+        .heart { color: #ff4d4d; font-size: 20px; }
+        .controls { position: absolute; bottom: -50px; color: #888; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="desktop" id="desktop"></div>
-<div id="taskbar"><button class="start-btn">start</button></div>
+<div id="ui">
+    <div id="health">HP: <span class="heart">❤❤❤</span></div>
+    <div id="inventory">GEMS: <span id="gems">0</span></div>
+    <div id="room-name">Forest Entrance</div>
+</div>
+
+<div id="game-container">
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <div class="controls">ARROWS to move | SPACE to swing Sword | R to Restart</div>
+</div>
 
 <script>
-    const games = [
-        {id:'mario', name:'Super Plumber', icon:'🍄', bg:'#5c94fc', type:'platformer', enemy:'🐢'},
-        {id:'sonic', name:'Blue Speed', icon:'🦔', bg:'#00008b', type:'runner', enemy:'🐝'},
-        {id:'zelda', name:'Hero Link', icon:'🗡️', bg:'#1e5d1e', type:'rpg', enemy:'💀'},
-        {id:'pkmn', name:'Monster Catch', icon:'🐾', bg:'#f8d030', type:'battle', enemy:'👹'},
-        {id:'mega', name:'Mega Man', icon:'🤖', bg:'#0050b0', type:'shooter', enemy:'🚁'},
-        {id:'pac', name:'Yellow Eater', icon:'🟡', bg:'#000', type:'maze', enemy:'👻'},
-        {id:'tetris', name:'Block Fit', icon:'🧱', bg:'#222', type:'puzzle', enemy:'Falling'},
-        {id:'snake', name:'Retro Snake', icon:'🐍', bg:'#000', type:'snake', enemy:'Self'},
-        {id:'pong', name:'Classic Pong', icon:'🏓', bg:'#111', type:'pong', enemy:'AI'},
-        {id:'dodge', name:'Bullet Hell', icon:'🔥', bg:'#300', type:'dodge', enemy:'☄️'},
-        {id:'space', name:'Invaders', icon:'🚀', bg:'#000', type:'shooter', enemy:'👾'},
-        {id:'ghost', name:'Ghost Hunt', icon:'👻', bg:'#1a1a2e', type:'rpg', enemy:'🕯️'},
-        {id:'race', name:'Turbo Race', icon:'🏎️', bg:'#555', type:'runner', enemy:'🚧'},
-        {id:'frog', name:'Frog Hop', icon:'🐸', bg:'#004d40', type:'platformer', enemy:'🚗'},
-        {id:'chef', name:'Pizza Time', icon:'🍕', bg:'#d32f2f', type:'clicker', enemy:'Timer'},
-        {id:'fish', name:'Fish Eat', icon:'🐟', bg:'#0277bd', type:'rpg', enemy:'🦈'},
-        {id:'bird', name:'Flappy Box', icon:'🐦', bg:'#4fc3f7', type:'platformer', enemy:'🌵'},
-        {id:'ninja', name:'Ninja Slash', icon:'🥷', bg:'#212121', type:'dodge', enemy:'🗡️'},
-        {id:'farm', name:'Farm Sim', icon:'🚜', bg:'#689f38', type:'clicker', enemy:'Crops'},
-        {id:'ice', name:'Ice Slider', icon:'❄️', bg:'#e1f5fe', type:'maze', enemy:'Spikes'},
-        {id:'fire', name:'Fire Fighter', icon:'👨‍🚒', bg:'#e65100', type:'shooter', enemy:'🔥'},
-        {id:'mine', name:'Gold Mine', icon:'⛏️', bg:'#3e2723', type:'clicker', enemy:'Rocks'},
-        {id:'ufo', name:'UFO Abduction', icon:'🛸', bg:'#4a148c', type:'rpg', enemy:'Cow'}
-    ];
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const gemCountText = document.getElementById('gems');
+    const healthText = document.getElementById('health');
 
-    const desktop = document.getElementById('desktop');
-    const keys = {};
-    window.onkeydown = e => keys[e.code] = true;
-    window.onkeyup = e => keys[e.code] = false;
+    // Game Constants
+    const TILE_SIZE = 40;
+    const WORLD_WIDTH = 15;
+    const WORLD_HEIGHT = 10;
 
-    games.forEach(g => {
-        const div = document.createElement('div');
-        div.className = 'icon';
-        div.onclick = () => openWindow(g);
-        div.innerHTML = `<span>${g.icon}</span>${g.name}`;
-        desktop.appendChild(div);
-    });
+    // Game State
+    let gameActive = true;
+    let frame = 0;
+    let player = {
+        x: 300, y: 200, w: 30, h: 30,
+        speed: 4, hp: 3, gems: 0,
+        dir: 'down',
+        isAttacking: false,
+        attackFrame: 0,
+        invuln: 0
+    };
 
-    function openWindow(game) {
-        const winId = 'win_' + Math.random().toString(36).substr(2,9);
-        const win = document.createElement('div');
-        win.className = 'window';
-        win.id = winId;
-        win.style.left = (Math.random() * 200 + 50) + 'px';
-        win.style.top = (Math.random() * 100 + 50) + 'px';
-        
-        win.innerHTML = `
-            <div class="title-bar" onmousedown="drag(this.parentElement)">
-                <span>${game.name}</span>
-                <div class="close-btn" onclick="document.getElementById('${winId}').remove()">X</div>
-            </div>
-            <div class="window-content">
-                <canvas id="canvas_${winId}" width="400" height="300"></canvas>
-                <div style="font-size:11px; margin-top:5px; color:#444; font-weight:bold;">
-                    ${getControls(game.type)}
-                </div>
-            </div>`;
-        document.body.appendChild(win);
-        startGame(game, `canvas_${winId}`);
-    }
+    let enemies = [];
+    let drops = [];
+    let currentRoom = { x: 0, y: 0 };
 
-    function getControls(type) {
-        if(type === 'platformer') return "SPACE: Jump | Avoid " + "Enemy";
-        if(type === 'shooter') return "ARROWS: Move | SPACE: Shoot";
-        if(type === 'rpg') return "ARROWS: Move | Collect Gems";
-        return "ARROWS to Move / Survive!";
-    }
-
-    function drag(el) {
-        el.onmousedown = e => {
-            if(e.target.className === 'close-btn') return;
-            document.querySelectorAll('.window').forEach(w => w.style.zIndex = 10);
-            el.style.zIndex = 100;
-            let ox = e.clientX - el.offsetLeft, oy = e.clientY - el.offsetTop;
-            document.onmousemove = e => {
-                el.style.left = (e.clientX - ox) + "px";
-                el.style.top = (e.clientY - oy) + "px";
-            };
-            document.onmouseup = () => document.onmousemove = null;
-        };
-    }
-
-    function startGame(game, cvsId) {
-        const canvas = document.getElementById(cvsId);
-        const ctx = canvas.getContext('2d');
-        let player = {x:50, y:200, w:30, h:30, dy:0, j:false, hp:3, dir:'right'};
-        let objects = [];
-        let frame = 0, score = 0;
-
-        function run() {
-            if(!document.getElementById(cvsId)) return;
-            ctx.fillStyle = game.bg;
-            ctx.fillRect(0,0,400,300);
-            frame++;
-
-            // --- UNIQUE LOGIC PER TYPE ---
-            if(game.type === 'platformer') {
-                ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.fillRect(0, 240, 400, 60); // Floor
-                if(keys['Space'] && !player.j) { player.dy = -10; player.j = true; }
-                player.dy += 0.5; player.y += player.dy;
-                if(player.y > 210) { player.y = 210; player.j = false; }
-                if(frame % 90 === 0) objects.push({x:400, y:220, t:'enemy'});
-            } 
-            else if(game.type === 'shooter') {
-                if(keys['ArrowUp'] && player.y > 0) player.y -= 4;
-                if(keys['ArrowDown'] && player.y < 270) player.y += 4;
-                if(keys['Space'] && frame % 15 === 0) objects.push({x:player.x+30, y:player.y+10, t:'bullet'});
-                if(frame % 60 === 0) objects.push({x:400, y:Math.random()*250, t:'enemy'});
-            }
-            else if(game.type === 'rpg') {
-                if(keys['ArrowUp'] && player.y > 0) player.y -= 3;
-                if(keys['ArrowDown'] && player.y < 270) player.y += 3;
-                if(keys['ArrowLeft'] && player.x > 0) player.x -= 3;
-                if(keys['ArrowRight'] && player.x < 370) player.x += 3;
-                if(frame % 120 === 0) objects.push({x:Math.random()*350, y:Math.random()*250, t:'gem'});
-                if(frame % 150 === 0) objects.push({x:400, y:Math.random()*250, t:'chaser'});
-            }
-            else if(game.type === 'runner') {
-                ctx.fillStyle = '#444'; ctx.fillRect(0, 240, 400, 60);
-                if(keys['ArrowUp'] && player.y > 50) player.y -= 5;
-                if(keys['ArrowDown'] && player.y < 210) player.y += 5;
-                if(frame % 40 === 0) objects.push({x:400, y:Math.random()*150 + 50, t:'enemy'});
-            }
-            else { // Default/Clicker/Maze
-                player.x += (keys['ArrowRight']?3:0) - (keys['ArrowLeft']?3:0);
-                player.y += (keys['ArrowDown']?3:0) - (keys['ArrowUp']?3:0);
-                if(frame % 100 === 0) objects.push({x:Math.random()*300, y:Math.random()*200, t:'gem'});
-            }
-
-            // --- RENDER & COLLISION ---
-            ctx.font = "35px Arial";
-            ctx.fillText(game.icon, player.x, player.y + 30);
-
-            objects.forEach((obj, i) => {
-                if(obj.t === 'enemy' || obj.t === 'chaser') {
-                    obj.x -= (game.type === 'runner' ? 6 : 3);
-                    if(obj.t === 'chaser') obj.y += (player.y > obj.y ? 1 : -1);
-                    ctx.fillText(game.enemy, obj.x, obj.y + 30);
-                    if(Math.abs(player.x - obj.x) < 25 && Math.abs(player.y - obj.y) < 25) {
-                        score = Math.max(0, score - 5); objects.splice(i, 1);
-                    }
-                }
-                else if(obj.t === 'bullet') {
-                    obj.x += 8;
-                    ctx.fillStyle = 'yellow'; ctx.fillRect(obj.x, obj.y, 15, 4);
-                    objects.forEach((en, j) => {
-                        if(en.t === 'enemy' && Math.abs(obj.x - en.x) < 20 && Math.abs(obj.y - en.y) < 30) {
-                            objects.splice(i, 1); objects.splice(j, 1); score += 10;
-                        }
-                    });
-                }
-                else if(obj.t === 'gem') {
-                    ctx.fillText("💎", obj.x, obj.y + 30);
-                    if(Math.abs(player.x - obj.x) < 30 && Math.abs(player.y - obj.y) < 30) {
-                        score += 20; objects.splice(i, 1);
-                    }
-                }
-                if(obj.x < -50) objects.splice(i, 1);
+    // Simple Map Generation (Walls at edges, some random rocks)
+    function spawnEnemies() {
+        enemies = [];
+        for(let i = 0; i < 3; i++) {
+            enemies.push({
+                x: Math.random() * (canvas.width - 60) + 30,
+                y: Math.random() * (canvas.height - 60) + 30,
+                w: 30, h: 30,
+                hp: 2,
+                speed: 1 + Math.random(),
+                type: 'slime',
+                lastDir: {x: 0, y: 0},
+                changeDirTimer: 0
             });
-
-            // UI
-            ctx.fillStyle = "white";
-            ctx.font = "bold 16px Tahoma";
-            ctx.shadowColor = "black"; ctx.shadowBlur = 4;
-            ctx.fillText("SCORE: " + score, 15, 25);
-            ctx.shadowBlur = 0;
-
-            requestAnimationFrame(run);
         }
-        run();
     }
+
+    const keys = {};
+    window.addEventListener('keydown', e => keys[e.code] = true);
+    window.addEventListener('keyup', e => keys[e.code] = false);
+
+    function checkCollision(a, b) {
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+
+    function update() {
+        if(!gameActive) {
+            if(keys['KeyR']) location.reload();
+            return;
+        }
+
+        // 1. Movement
+        if (!player.isAttacking) {
+            if (keys['ArrowUp']) { player.y -= player.speed; player.dir = 'up'; }
+            if (keys['ArrowDown']) { player.y += player.speed; player.dir = 'down'; }
+            if (keys['ArrowLeft']) { player.x -= player.speed; player.dir = 'left'; }
+            if (keys['ArrowRight']) { player.x += player.speed; player.dir = 'right'; }
+        }
+
+        // 2. Attack Logic
+        if (keys['Space'] && !player.isAttacking) {
+            player.isAttacking = true;
+            player.attackFrame = 10;
+        }
+        if (player.attackFrame > 0) player.attackFrame--;
+        else player.isAttacking = false;
+
+        // 3. Keep Player in Bounds / Room Transition
+        if (player.x < 0) { player.x = canvas.width - 40; spawnEnemies(); }
+        if (player.x > canvas.width - 30) { player.x = 10; spawnEnemies(); }
+        if (player.y < 0) { player.y = canvas.height - 40; spawnEnemies(); }
+        if (player.y > canvas.height - 30) { player.y = 10; spawnEnemies(); }
+
+        // 4. Enemy AI & Collision
+        enemies.forEach((en, index) => {
+            // Basic movement
+            if(en.changeDirTimer <= 0) {
+                en.lastDir = { x: (Math.random() - 0.5) * en.speed, y: (Math.random() - 0.5) * en.speed };
+                en.changeDirTimer = 60;
+            }
+            en.x += en.lastDir.x;
+            en.y += en.lastDir.y;
+            en.changeDirTimer--;
+
+            // Bounce off walls
+            if(en.x < 0 || en.x > canvas.width - en.w) en.lastDir.x *= -1;
+            if(en.y < 0 || en.y > canvas.height - en.h) en.lastDir.y *= -1;
+
+            // Player Sword Collision
+            if(player.isAttacking) {
+                let swordRect = { x: player.x, y: player.y, w: 30, h: 30 };
+                if(player.dir === 'up') swordRect.y -= 30;
+                if(player.dir === 'down') swordRect.y += 30;
+                if(player.dir === 'left') swordRect.x -= 30;
+                if(player.dir === 'right') swordRect.x += 30;
+
+                if(checkCollision(swordRect, en)) {
+                    en.hp--;
+                    // Knockback
+                    en.x += (en.x - player.x) * 2;
+                    en.y += (en.y - player.y) * 2;
+                }
+            }
+
+            // Player Damage Collision
+            if(checkCollision(player, en) && player.invuln <= 0) {
+                player.hp--;
+                player.invuln = 60;
+                player.x += (player.x - en.x) * 1.5; // Damage knockback
+                updateUI();
+            }
+
+            if(en.hp <= 0) {
+                drops.push({x: en.x, y: en.y, w: 20, h: 20});
+                enemies.splice(index, 1);
+            }
+        });
+
+        // 5. Gems Collection
+        drops.forEach((d, i) => {
+            if(checkCollision(player, d)) {
+                player.gems += 5;
+                drops.splice(i, 1);
+                updateUI();
+            }
+        });
+
+        if(player.invuln > 0) player.invuln--;
+        if(player.hp <= 0) gameActive = false;
+
+        frame++;
+    }
+
+    function updateUI() {
+        gemCountText.innerText = player.gems;
+        let h = "";
+        for(let i=0; i<player.hp; i++) h += "❤";
+        healthText.innerHTML = `HP: <span class="heart">${h}</span>`;
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Grass Details
+        ctx.fillStyle = "#1b551b";
+        for(let i=0; i<canvas.width; i+=100) {
+            for(let j=0; j<canvas.height; j+=100) {
+                ctx.fillRect(i + (frame%10), j, 2, 2);
+            }
+        }
+
+        // Draw Drops (Gems)
+        ctx.fillStyle = "#00ffff";
+        drops.forEach(d => ctx.fillText("💎", d.x, d.y + 15));
+
+        // Draw Enemies
+        ctx.font = "30px Arial";
+        enemies.forEach(en => {
+            ctx.fillText("💀", en.x, en.y + 25);
+        });
+
+        // Draw Player
+        if(player.invuln % 10 < 5) {
+            ctx.fillText("🛡️", player.x, player.y + 25);
+        }
+
+        // Draw Sword Swing
+        if(player.isAttacking) {
+            ctx.fillStyle = "white";
+            let sx = player.x, sy = player.y;
+            if(player.dir === 'up') sy -= 25;
+            if(player.dir === 'down') sy += 25;
+            if(player.dir === 'left') sx -= 25;
+            if(player.dir === 'right') sx += 25;
+            ctx.fillText("⚔️", sx, sy + 25);
+        }
+
+        if(!gameActive) {
+            ctx.fillStyle = "rgba(0,0,0,0.7)";
+            ctx.fillRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.font = "40px Courier";
+            ctx.fillText("GAME OVER", 190, 200);
+            ctx.font = "20px Courier";
+            ctx.fillText("Press R to Try Again", 190, 240);
+        }
+    }
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    spawnEnemies();
+    loop();
 </script>
 </body>
 </html>
